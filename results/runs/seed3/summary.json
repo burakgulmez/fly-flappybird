@@ -1,0 +1,11 @@
+{
+ "seed": 3,
+ "n_params": 64,
+ "generations": 10,
+ "train_frames": 1007378,
+ "train_time_s": 53.23136925697327,
+ "test_mean_pipes": 100.0,
+ "test_median_pipes": 100.0,
+ "test_max_pipes": 100.0,
+ "test_win_rate": 1.0
+}

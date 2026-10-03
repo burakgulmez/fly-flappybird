@@ -1,0 +1,40 @@
+{
+ "neurons": 384,
+ "inputs": 314,
+ "intermediates": 60,
+ "outputs": 10,
+ "edges": 5810,
+ "frac_excitatory_edges": 0.9060240963855422,
+ "spectral_radius_raw": 22.86644017409044,
+ "nt_edges": {
+  "ACH": 5264,
+  "GABA": 443,
+  "GLUT": 103
+ },
+ "input_types": {
+  "LPLC2": 210,
+  "LC4": 104
+ },
+ "output_types": {
+  "DNp01": 2,
+  "DNp02": 2,
+  "DNp04": 2,
+  "DNp06": 2,
+  "DNp11": 2
+ },
+ "intermediate_top_types": {
+  "PVLP122b": 4,
+  "PVLP151": 4,
+  "PVLP024": 4,
+  "AMMC-A1": 4,
+  "CB3114": 3,
+  "LT61b": 2,
+  "DNp103": 2,
+  "CL323a": 2,
+  "PVLP130": 2,
+  "PVLP010": 2
+ },
+ "edges_input_to_output": 804,
+ "edges_input_to_intermediate": 2540,
+ "edges_intermediate_to_output": 215
+}

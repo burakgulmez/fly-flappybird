@@ -1,0 +1,3 @@
+agent,mean_pipes,median_pipes,win_rate
+heuristic,84.18,100.0,0.68
+random_10pct_flap,0.065,0.0,0.0

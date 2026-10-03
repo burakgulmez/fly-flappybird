@@ -1,0 +1,14 @@
+{
+ "rho": 0.9,
+ "k_in": 8,
+ "T": 4,
+ "popsize": 16,
+ "games_per_eval": 8,
+ "sigma0": 0.5,
+ "budget_frames": 1000000,
+ "val_every": 10,
+ "val_games": 32,
+ "test_games": 200,
+ "survival_bonus_per_frame": 0.0033333333333333335,
+ "n_params": 64
+}

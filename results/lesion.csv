@@ -1,0 +1,46 @@
+seed,condition,n_silenced,mean_pipes,win_rate
+0,intact,0,100.0,1.0
+0,all intermediates,60,100.0,1.0
+0,LC4 inputs,104,100.0,1.0
+0,LPLC2 inputs,210,100.0,1.0
+0,DNp01 output,2,100.0,1.0
+0,DNp02 output,2,100.0,1.0
+0,DNp04 output,2,100.0,1.0
+0,DNp06 output,2,100.0,1.0
+0,DNp11 output,2,100.0,1.0
+1,intact,0,100.0,1.0
+1,all intermediates,60,100.0,1.0
+1,LC4 inputs,104,100.0,1.0
+1,LPLC2 inputs,210,100.0,1.0
+1,DNp01 output,2,7.46,0.0
+1,DNp02 output,2,100.0,1.0
+1,DNp04 output,2,100.0,1.0
+1,DNp06 output,2,100.0,1.0
+1,DNp11 output,2,100.0,1.0
+2,intact,0,100.0,1.0
+2,all intermediates,60,100.0,1.0
+2,LC4 inputs,104,100.0,1.0
+2,LPLC2 inputs,210,100.0,1.0
+2,DNp01 output,2,100.0,1.0
+2,DNp02 output,2,100.0,1.0
+2,DNp04 output,2,100.0,1.0
+2,DNp06 output,2,100.0,1.0
+2,DNp11 output,2,100.0,1.0
+3,intact,0,100.0,1.0
+3,all intermediates,60,100.0,1.0
+3,LC4 inputs,104,100.0,1.0
+3,LPLC2 inputs,210,3.745,0.0
+3,DNp01 output,2,100.0,1.0
+3,DNp02 output,2,100.0,1.0
+3,DNp04 output,2,2.525,0.0
+3,DNp06 output,2,100.0,1.0
+3,DNp11 output,2,100.0,1.0
+4,intact,0,100.0,1.0
+4,all intermediates,60,100.0,1.0
+4,LC4 inputs,104,100.0,1.0
+4,LPLC2 inputs,210,100.0,1.0
+4,DNp01 output,2,100.0,1.0
+4,DNp02 output,2,100.0,1.0
+4,DNp04 output,2,100.0,1.0
+4,DNp06 output,2,100.0,1.0
+4,DNp11 output,2,100.0,1.0

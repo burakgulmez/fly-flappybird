@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fly Escape Circuit Flappy Bird</title>
+<style>
+  :root {
+    --bg: #fcfcfb; --panel: #f4f3f0; --ink: #0b0b0b; --ink2: #52514e; --line: #dddcd6; --btn: #ffffff;
+    --sky: #eaf3fd; --pipe: #1baf7a; --pipe-edge: #0f6e4c; --bird: #eda100; --bird-edge: #7a5200;
+    --pos: #2a78d6; --neg: #e34948; --accent: #2a78d6; --ground: #d9d2c0; --line2: #b9cde6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141413; --panel: #1f1f1d; --ink: #f4f3ee; --ink2: #c3c2b7; --line: #383835; --btn: #2a2a28;
+      --sky: #182233; --pipe: #199e70; --pipe-edge: #7fe0bb; --bird: #c98500; --bird-edge: #ffd98a;
+      --pos: #3987e5; --neg: #e66767; --accent: #3987e5; --ground: #3a3527; --line2: #33445e;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141413; --panel: #1f1f1d; --ink: #f4f3ee; --ink2: #c3c2b7; --line: #383835; --btn: #2a2a28;
+    --sky: #182233; --pipe: #199e70; --pipe-edge: #7fe0bb; --bird: #c98500; --bird-edge: #ffd98a;
+    --pos: #3987e5; --neg: #e66767; --accent: #3987e5; --ground: #3a3527; --line2: #33445e;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.35rem; margin: 0 0 4px; }
+  .sub { color: var(--ink2); margin: 0 0 14px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  canvas { width: 100%; height: auto; display: block; border-radius: 6px; }
+  .stats { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0; font-variant-numeric: tabular-nums; }
+  .stats b { font-size: 1.1rem; } .stats span { color: var(--ink2); font-size: .8rem; display: block; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0; }
+  button, input { font: inherit; color: var(--ink); background: var(--btn); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; }
+  button { cursor: pointer; } button.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  input[type=number] { width: 8.5em; } label { color: var(--ink2); font-size: .85rem; }
+  .legend { color: var(--ink2); font-size: .8rem; }
+  .note { color: var(--ink2); font-size: .85rem; border-left: 3px solid var(--accent); padding-left: 10px; margin-top: 16px; }
+  .bar { height: 12px; background: var(--line); border-radius: 4px; position: relative; overflow: hidden; }
+  .bar > div { position: absolute; top: 0; bottom: 0; background: var(--accent); }
+  .bar::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--ink2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Fly Escape Circuit plays Flappy Bird</h1>
+  <p class="sub">A fixed network wired like the fruit fly's looming-escape circuit (FlyWire connectome) controls the flap through a small trained interface.</p>
+  <div class="grid">
+    <div class="card">
+      <canvas id="game" width="480" height="480" aria-label="Flappy Bird"></canvas>
+      <div class="stats">
+        <div><span>Pipes</span><b id="s-score">0</b></div>
+        <div><span>Frames</span><b id="s-frames">0</b></div>
+        <div><span>Best this session</span><b id="s-best">0</b></div>
+        <div><span>Status</span><b id="s-status">ready</b></div>
+      </div>
+      <div class="row"><button id="b-start">Start</button><button id="b-step">Step</button><button id="b-new">New game</button>
+        <label>seed <input id="i-seed" type="number" value="1000000000"></label></div>
+      <div class="row"><label>Speed</label><button data-speed="1" class="on">Normal</button><button data-speed="5">Fast 5×</button><button data-speed="0">Turbo</button></div>
+      <div class="row"><label>Lesion</label><button id="b-les-mid">Silence intermediate neurons</button><button id="b-les-gf">Silence giant fiber (DNp01)</button></div>
+    </div>
+    <div class="card">
+      <b>Brain activity</b>
+      <canvas id="brain" width="500" height="330" aria-label="Neuron activity"></canvas>
+      <div class="legend">Left: loom detectors LPLC2 and LC4 (inputs, 314 neurons) · middle: intermediate neurons (60) · right: escape descending neurons (10). Colour = activity (blue positive, red negative); a black ring marks a silenced neuron.</div>
+      <div style="margin-top:10px"><b>Flap decision</b> <span class="legend" id="z-val"></span></div>
+      <div class="bar"><div id="z-bar"></div></div>
+      <div class="legend" style="display:flex;justify-content:space-between"><span>← glide</span><span>flap →</span></div>
+    </div>
+  </div>
+  <p class="note"><b>What this is.</b> A hobby experiment. The network's connections come from a real brain wiring map (FlyWire FAFB v783), from neurons flies use to detect approaching objects and trigger a take-off escape. The connection weights are fixed. Only 64 numbers were trained with an evolution strategy (about a minute on a laptop). They map six game readings (height, speed, distance to the next pipe, and gap position) onto the input neurons, and read one flap/glide decision from the output neurons. It is not a fly's mind, and a real fly never sees pipes. In our tests all 5 trained networks passed 100 of 100 pipes in each of 200 unseen games.</p>
+  <p class="legend" id="err"></p>
+</div>
+<script src="sim.js"></script>
+<script src="weights.js"></script>
+<script>
+(function () {
+  "use strict";
+  const S = window.FlyFlappy, M = window.FLAPPY_WEIGHTS, $ = (id) => document.getElementById(id);
+  if (!M) { $("err").textContent = "weights.js not found."; return; }
+  let COL = {};
+  function readColors() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of ["--line2", "--sky", "--pipe", "--pipe-edge", "--bird", "--bird-edge", "--ink", "--ink2", "--panel", "--pos", "--neg"])
+      COL[k] = cs.getPropertyValue(k).trim();
+  }
+  readColors();
+  const css = (v) => COL[v];
+  const net = new S.Net(M), u = new Float64Array(6);
+  let camX = 0, game, prevY = 0.5, prevFrame = 0, alpha = 1, wingT = 0, running = false, speed = 1, timer = null, best = 0, lesMid = false, lesGF = false;
+
+  function newGame() {
+    game = new S.Game(Math.max(0, parseInt($("i-seed").value, 10) || 0));
+    prevY = game.y; prevFrame = game.frame; alpha = 1; camX = 0;
+    net.reset(); applyMask(); draw();
+  }
+  function applyMask() {
+    net.mask.fill(1);
+    for (let i = 0; i < M.n; i++) {
+      if (lesMid && M.role[i] === 1) net.mask[i] = 0;
+      if (lesGF && M.types[i] === "DNp01") net.mask[i] = 0;
+    }
+  }
+  function tick() {
+    if (game.done) { stop(); return false; }
+    prevY = game.y; prevFrame = game.frame;
+    game.features(u); game.step(net.step(u));
+    best = Math.max(best, game.score);
+    return true;
+  }
+
+  const cv = $("game"), cx = cv.getContext("2d");
+  function drawGame() {
+    const W = cv.width, H = cv.height, P = S.P;
+    const X = (x) => x * W, Y = (y) => (1 - y) * H;
+    // interpolate between the last two simulation frames so motion is smooth at any refresh rate
+    const t = game.done ? 1 : alpha;
+    const fr = prevFrame + (game.frame - prevFrame) * t;
+    const yy = prevY + (game.y - prevY) * t;
+    cx.fillStyle = css("--sky"); cx.fillRect(0, 0, W, H);
+    // Fixed camera: pipes stay still on screen and the bird flies forward.
+    // (Physics is unchanged: bird world x = BIRD_X + frame*SPEED, pipe k at FIRST_X + k*SPACING.)
+    const birdWX = P.BIRD_X + fr * P.SPEED;
+    if (birdWX - camX > 0.8) camX = birdWX - 0.2;          // jump the view forward
+    if (birdWX - camX < 0.1) camX = Math.max(0, birdWX - 0.2); // new game / reset
+    cx.strokeStyle = css("--line2"); cx.lineWidth = 1;        // faint distance marks help show motion
+    for (let m = Math.ceil(camX * 10) / 10; m < camX + 1; m += 0.1) {
+      const xm = Math.round((m - camX) * W) + 0.5; cx.beginPath(); cx.moveTo(xm, H - 8); cx.lineTo(xm, H); cx.stroke();
+    }
+    cx.fillStyle = css("--pipe"); cx.strokeStyle = css("--pipe-edge"); cx.lineWidth = 2;
+    const kStart = Math.max(0, Math.floor((camX - P.FIRST_X - P.PIPE_W) / P.SPACING));
+    for (let k = kStart; k < P.N_GAPS; k++) {
+      const px = P.FIRST_X + k * P.SPACING - camX;
+      if (px > 1.0) break;
+      if (px + P.PIPE_W < 0) continue;
+      const g = game.gaps[k], x0 = Math.round(X(px)), w = Math.round(X(P.PIPE_W));
+      const gt = Math.round(Y(g + P.GAP / 2)), gb = Math.round(Y(g - P.GAP / 2));
+      cx.fillRect(x0, -2, w, gt + 2); cx.strokeRect(x0 + 1, -2, w - 2, gt + 1);
+      cx.fillRect(x0, gb, w, H - gb + 2); cx.strokeRect(x0 + 1, gb + 1, w - 2, H - gb + 2);
+      cx.fillRect(x0 - 4, gt - 14, w + 8, 14); cx.strokeRect(x0 - 3, gt - 14, w + 6, 13);
+      cx.fillRect(x0 - 4, gb, w + 8, 14); cx.strokeRect(x0 - 3, gb + 1, w + 6, 13);
+    }
+    // bird faces right (direction of travel); gentle tilt from vertical speed; wing flaps after a flap
+    const vy = game.y - prevY;
+    const bxp = X(birdWX - camX), byp = Y(yy), r = P.R * H * 1.1;
+    const ang = -Math.max(-0.5, Math.min(0.35, (vy / P.MAX_FALL) * 0.6));
+    if (vy > 0.01) wingT = 1; else wingT *= 0.85;
+    cx.save(); cx.translate(bxp, byp); cx.rotate(ang);
+    cx.lineWidth = 2; cx.strokeStyle = css("--bird-edge");
+    cx.fillStyle = css("--bird");
+    cx.beginPath(); cx.moveTo(-r * 1.0, -r * 0.1); cx.lineTo(-r * 1.6, -r * 0.5); cx.lineTo(-r * 1.5, r * 0.35); cx.closePath(); cx.fill(); cx.stroke(); // tail
+    cx.beginPath(); cx.ellipse(0, 0, r * 1.15, r * 0.95, 0, 0, 7); cx.fill(); cx.stroke();               // body
+    cx.fillStyle = "#fff4d6";
+    cx.beginPath(); cx.ellipse(-r * 0.25, r * 0.1 - wingT * r * 0.45, r * 0.55, r * 0.3, -0.3 - wingT * 0.6, 0, 7); cx.fill(); cx.stroke(); // wing
+    cx.fillStyle = "#e34948";
+    cx.beginPath(); cx.moveTo(r * 0.95, -r * 0.2); cx.lineTo(r * 1.7, r * 0.05); cx.lineTo(r * 0.95, r * 0.35); cx.closePath(); cx.fill(); // beak
+    cx.fillStyle = "#fff"; cx.beginPath(); cx.arc(r * 0.5, -r * 0.35, r * 0.3, 0, 7); cx.fill();
+    cx.fillStyle = "#0b0b0b"; cx.beginPath(); cx.arc(r * 0.62, -r * 0.35, r * 0.14, 0, 7); cx.fill();
+    cx.restore();
+    cx.fillStyle = css("--ink"); cx.font = "bold 28px system-ui"; cx.textAlign = "center"; cx.fillText(String(game.score), W / 2, 40);
+    $("s-score").textContent = game.score; $("s-frames").textContent = game.frame; $("s-best").textContent = best;
+    $("s-status").textContent = game.done ? S.CAUSES[game.cause] : (running ? "flying" : "paused");
+  }
+
+  const bc = $("brain"), bx = bc.getContext("2d");
+  let pos = null, labelAt = new Set();
+  function layout() {
+    const cols = [[], [], []]; for (let i = 0; i < M.n; i++) cols[M.role[i]].push(i);
+    cols[2].sort((a, b) => M.types[a] < M.types[b] ? -1 : M.types[a] > M.types[b] ? 1 : a - b);
+    labelAt = new Set(cols[2].filter((i, k) => k === 0 || M.types[i] !== M.types[cols[2][k - 1]]));
+    const W = bc.width, H = bc.height, xs = [W * 0.2, W * 0.55, W * 0.84], widths = [W * 0.34, W * 0.18, W * 0.1];
+    pos = new Array(M.n);
+    cols.forEach((list, c) => {
+      const per = c === 2 ? 1 : Math.ceil(Math.sqrt(list.length * widths[c] / (H - 30)));
+      const rows = Math.ceil(list.length / per), dx = widths[c] / per, dy = Math.min((H - 30) / rows, 26);
+      list.forEach((i, k) => { pos[i] = [xs[c] + ((k % per) - (per - 1) / 2) * dx, 15 + (Math.floor(k / per) + .5) * dy, Math.min(dx, dy)]; });
+    });
+  }
+  function drawBrain() {
+    if (!pos) layout();
+    const W = bc.width, H = bc.height;
+    bx.fillStyle = css("--panel"); bx.fillRect(0, 0, W, H);
+    const pc = css("--pos"), nc = css("--neg"), ink = css("--ink");
+    for (let i = 0; i < M.n; i++) {
+      const [x, y, s] = pos[i], v = net.phi[i];
+      bx.globalAlpha = 0.15 + 0.85 * Math.min(1, Math.abs(v));
+      bx.fillStyle = v >= 0 ? pc : nc;
+      bx.beginPath(); bx.arc(x, y, Math.max(1.5, s * 0.42), 0, 7); bx.fill();
+      bx.globalAlpha = 1;
+      if (net.mask[i] === 0) { bx.strokeStyle = ink; bx.lineWidth = 1; bx.stroke(); }
+      if (labelAt.has(i)) {
+        bx.fillStyle = css("--ink2"); bx.font = "11px system-ui"; bx.textAlign = "left"; bx.fillText(M.types[i], x + 12, y + 4);
+      }
+    }
+    const z = net.z, w = Math.min(50, Math.abs(z) * 10);
+    const bar = $("z-bar"); bar.style.width = w + "%"; bar.style.left = (z >= 0 ? 50 : 50 - w) + "%";
+    $("z-val").textContent = `readout ${z.toFixed(2)}`;
+  }
+  function draw() { drawGame(); drawBrain(); }
+
+  let last = 0, acc = 0, lastBrain = 0;
+  const SIM_HZ = 60;
+  function loop(now) {
+    if (!running) return;
+    if (!last) last = now;
+    const dt = Math.min(50, now - last); last = now;
+    if (speed === 0) {
+      const t0 = performance.now();
+      while (performance.now() - t0 < 12 && tick());
+      alpha = 1;
+    } else {
+      acc += dt * SIM_HZ * speed / 1000;
+      let n = 0;
+      while (acc >= 1 && n < 60) { if (!tick()) { acc = 0; break; } acc -= 1; n++; }
+      alpha = speed === 1 ? acc : 1;
+    }
+    drawGame();
+    if (now - lastBrain > 50) { drawBrain(); lastBrain = now; }
+    if (running) timer = requestAnimationFrame(loop);
+  }
+  function start() { if (game.done) newGame(); running = true; last = 0; acc = 0; $("b-start").textContent = "Pause"; timer = requestAnimationFrame(loop); }
+  function stop() { running = false; cancelAnimationFrame(timer); $("b-start").textContent = "Start"; draw(); }
+  $("b-start").onclick = () => (running ? stop() : start());
+  $("b-step").onclick = () => { stop(); tick(); alpha = 1; draw(); };
+  $("b-new").onclick = () => { stop(); newGame(); };
+  $("b-les-mid").onclick = () => { lesMid = !lesMid; $("b-les-mid").classList.toggle("on", lesMid); applyMask(); draw(); };
+  $("b-les-gf").onclick = () => { lesGF = !lesGF; $("b-les-gf").classList.toggle("on", lesGF); applyMask(); draw(); };
+  document.querySelectorAll("[data-speed]").forEach((b) => b.onclick = () => {
+    speed = +b.dataset.speed; document.querySelectorAll("[data-speed]").forEach((x) => x.classList.toggle("on", x === b));
+  });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { readColors(); draw(); });
+  newGame();
+  const pre = parseInt(new URLSearchParams(location.search).get("frames") || "0", 10);
+  for (let i = 0; i < pre && tick(); i++);
+  draw();
+  // ?record=N : press Start and store N canvas snapshots + state (for automated visual tests)
+  const recN = parseInt(new URLSearchParams(location.search).get("record") || "0", 10);
+  if (recN > 0) {
+    const out = document.createElement("pre"); out.id = "rec"; document.body.appendChild(out);
+    const snaps = []; let count = 0;
+    start();
+    (function rec() {
+      count++;
+      if (count % 3 === 0 && snaps.length < recN)
+        snaps.push({ raf: count, frame: game.frame, y: +game.y.toFixed(4), vy: +game.vy.toFixed(4), score: game.score,
+                     alpha: +alpha.toFixed(3), img: cv.toDataURL("image/png") });
+      if (snaps.length < recN && running) requestAnimationFrame(rec); else out.textContent = JSON.stringify(snaps);
+    })();
+  }
+})();
+</script>
+</body>
+</html>
